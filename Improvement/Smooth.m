@@ -1,0 +1,72 @@
+clear; clc;
+close all;
+Fs = 1024;       % 采样频率
+N = Fs*100;
+nfft  =  N;   % fft计算点数大于采样数据点时，补零，计算N点fft
+
+% 产生含有噪声的序列
+n = (0:N-1)/N;
+Xn = cos(2*pi*100*n)+3*cos(2*pi*200*n)+2*randn(size(n));
+figure(1);
+subplot(2,1,1);
+plot(Xn);
+axis([0 length(Xn) -10 10]);
+title('Signal with Noise'); grid on
+window_length = 102400;
+window_num = length(Xn)/window_length;
+
+%%
+% 自相关法
+% 根据维纳-辛钦定理，先求自相关函数，求其傅氏变换得功率谱
+CXn = xcorr(Xn, 'unbiased');  % 计算自相关函数
+CXk = fft(CXn,nfft);  % 傅氏变换
+cpsd = abs(CXk);  % 取复数的模
+index = round(nfft/2-1);  % 因为是对称的，只取前半段
+figure(1);
+subplot(2,1,2);
+semilogy(cpsd(1:index));  % 10*log10(Pxx)为分贝大小，此处为分贝的1/10
+axis([0 600 10^(1) 10^(7)]);
+title('Using Correlation');grid on
+
+%%
+window1 = boxcar(window_length);  % 矩形窗
+Win1 = fft(window1);
+CXn = xcorr(Xn, 'unbiased');
+CXk = fft(CXn, length(CXn));
+Xxn1 = conv(CXk, Win1);
+cpsd = abs(Xxn1)/window_length;  % 取复数的模
+xaxis = (0:length(cpsd)-1)/2;
+figure(2);
+subplot(3,1,1);
+semilogy(xaxis, cpsd);  % 10*log10(Pxx)为分贝大小，此处为分贝的1/10
+axis([0 600 10^(1) 10^(7)]);
+title('Boxcar');grid on
+
+%%
+window2 = hamming(window_length);  % 海明窗
+Win2 = fft(window2);
+CXn = xcorr(Xn, 'unbiased');
+CXk = fft(CXn, length(CXn));
+Xxn2 = conv(CXk, Win2);
+cpsd = abs(Xxn2)/window_length;  % 取复数的模
+xaxis = (0:length(cpsd)-1)/2;
+figure(2);
+subplot(3,1,2);
+semilogy(xaxis, cpsd);  % 10*log10(Pxx)为分贝大小，此处为分贝的1/10
+axis([0 600 10^(1) 10^(7)]);
+title('Hamming');grid on
+
+%%
+window3 = blackman(window_length);  % blackman窗
+Win3 = fft(window3);
+CXn = xcorr(Xn, 'unbiased');
+CXk = fft(CXn, length(CXn));
+Xxn3 = conv(CXk, Win3);
+cpsd = abs(Xxn3)/window_length;  % 取复数的模
+xaxis = (0:length(cpsd)-1)/2;
+figure(2);
+subplot(3,1,3);
+semilogy(xaxis, cpsd);  % 10*log10(Pxx)为分贝大小，此处为分贝的1/10
+axis([0 600 10^(1) 10^(7)]);
+title('Blackman');grid on
+
