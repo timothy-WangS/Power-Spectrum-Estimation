@@ -6,7 +6,7 @@ nfft  =  N;   % fft计算点数大于采样数据点时，补零，计算N点fft
 
 % 产生含有噪声的序列
 n = (0:N-1)/N;
-Xn = cos(2*pi*10*n)+3*cos(2*pi*20*n)+2*randn(size(n));
+Xn = cos(2*pi*100*n)+3*cos(2*pi*200*n)+2*randn(size(n));
 figure(1);
 subplot(2,1,1);
 plot(Xn); 
